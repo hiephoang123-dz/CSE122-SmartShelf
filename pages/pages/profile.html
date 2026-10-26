@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartShelf - Profile Nhân Viên</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="associate-zone-view.html" class="brand-logo">👷 SmartShelf</a>
+      <a href="associate-zone-view.html" class="btn btn-outline">⬅️ Quay về Vận hành</a>
+    </div>
+  </header>
+
+  <main class="container" style="max-width: 500px; margin-top: 40px;">
+    <div class="search-hero" style="padding: 28px; text-align: center;">
+      <div style="font-size: 4rem;">👷‍♂️</div>
+      <h2 style="font-size: 1.4rem; font-weight: 800; margin-top: 8px;">Nguyễn Văn Nhân Viên</h2>
+      <p style="color: var(--slate-500); font-size: 0.9rem;">Vai trò: Associate (Nhân viên cửa hàng)</p>
+      
+      <div style="text-align: left; margin-top: 24px; border-top: 1px solid var(--slate-200); padding-top: 16px;">
+        <p style="font-size: 0.88rem; margin-bottom: 8px;"><strong>Mã nhân viên:</strong> NV-8892</p>
+        <p style="font-size: 0.88rem; margin-bottom: 8px;"><strong>Khu vực phụ trách:</strong> Khu A (Sữa & Chế phẩm)</p>
+        <p style="font-size: 0.88rem;"><strong>Số task kiểm kệ / restock đã xong:</strong> 18 nhiệm vụ</p>
+      </div>
+
+      <!-- HÀM ĐĂNG XUẤT: Xóa người dùng khỏi LocalStorage và đưa về login -->
+      <button onclick="localStorage.removeItem('smartshelf_user'); window.location.href='login.html';" class="btn btn-outline" style="width: 100%; margin-top: 24px; color: var(--danger-text); border-color: var(--danger-bg);">
+        🚪 Đăng xuất khỏi hệ thống
+      </button>
+    </div>
+  </main>
+</body>
+</html>

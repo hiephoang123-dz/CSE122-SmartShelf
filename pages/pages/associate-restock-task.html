@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartShelf - Restock Tasks & AI Priority</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <style>
+    .kanban-board { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 20px; }
+    .kanban-col { background: var(--bg-app); border: 1px solid var(--slate-200); border-radius: var(--radius-md); padding: 16px; }
+    .task-card { background: #fff; border: 1px solid var(--slate-200); border-radius: var(--radius-sm); padding: 14px; margin-bottom: 12px; box-shadow: var(--shadow-card); }
+    .priority-HIGH { border-top: 4px solid #ef4444; }
+    .priority-MEDIUM { border-top: 4px solid #f59e0b; }
+    .priority-LOW { border-top: 4px solid #10b981; }
+  </style>
+</head>
+<body>
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="associate-zone-view.html" class="brand-logo">
+        👷 SmartShelf <span class="brand-badge">Nhiệm Vụ Restock</span>
+      </a>
+      <nav style="display: flex; gap: 8px;">
+        <a href="associate-zone-view.html" class="btn btn-outline">🏠 Sơ đồ Zone</a>
+        <!-- Nút bấm Kích hoạt trải nghiệm AI-1 -->
+        <button id="btnTriggerAI1" class="btn btn-ai">✨ AI-1 Gợi Ý Ưu Tiên</button>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="margin-top: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
+      <div>
+        <h1 class="hero-title">Bảng Điều Phối Bổ Sung Hàng (Restock Tasks)</h1>
+        <p class="hero-subtitle">Quản lý trạng thái xử lý danh sách các kệ hàng cần bơm sản phẩm mới</p>
+      </div>
+    </div>
+
+    <!-- Bảng Kanban chia 3 cột trạng thái -->
+    <div class="kanban-board">
+      <div class="kanban-col">
+        <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px; color: var(--slate-700);">⏳ CHỜ BƠM HÀNG (PENDING)</h3>
+        <div id="colPending"></div>
+      </div>
+
+      <div class="kanban-col">
+        <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px; color: var(--primary);">⚡ ĐANG BƠM HÀNG (IN PROGRESS)</h3>
+        <div id="colInProgress"></div>
+      </div>
+
+      <div class="kanban-col">
+        <h3 style="font-size: 0.95rem; font-weight: 800; margin-bottom: 12px; color: #10b981;">✅ HOÀN TẤT (COMPLETED)</h3>
+        <div id="colCompleted"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL TRẢI NGHIỆM AI-1 TÍNH NĂNG GỢI Ý ƯU TIÊN -->
+  <div id="ai1Modal" class="modal-overlay hidden">
+    <div class="modal-box" style="max-width: 520px;">
+      <div class="modal-ai-header">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <span>🤖</span>
+          <h3 style="font-size: 1rem; font-weight: 700;">AI-1: Restock Priority AI</h3>
+        </div>
+        <button id="btnCloseAI1" style="background: transparent; border: none; color: #fff; font-size: 1.2rem; cursor: pointer;">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Trạng thái Skeleton loading mô phỏng AI đang tính toán -->
+        <div id="ai1Loading" class="hidden" style="padding: 24px; text-align: center;">
+          <div class="shimmer"></div>
+          <div class="shimmer" style="width: 75%;"></div>
+          <p style="font-size: 0.88rem; color: var(--slate-500); margin-top: 12px;">AI đang phân tích tần suất cạn hàng & khung giờ cao điểm...</p>
+        </div>
+
+        <!-- Trạng thái Hiển thị Kết quả phân tích & Lý do của AI -->
+        <div id="ai1Result" class="hidden">
+          <p style="font-size: 0.82rem; font-weight: 700; color: var(--slate-700); text-transform: uppercase;">Xếp hạng danh sách kệ bổ sung ưu tiên:</p>
+          
+          <div id="ai1RecommendationList" style="margin: 12px 0;"></div>
+
+          <!-- Thẻ giải thích lý do cụ thể từ AI -->
+          <div class="ai-reason-card">
+            💡 <strong>Giải thích lý do AI:</strong> Kệ A1-05 và C1-03 đạt ngưỡng báo động (&lt; 10% lấp đầy) ngay trước khung giờ cao điểm (17h - 19h). Việc xếp ưu tiên gấp giúp tối đa hóa khả năng phục vụ khách mua sắm.
+          </div>
+
+          <div style="display: flex; gap: 10px; margin-top: 16px;">
+            <button id="btnApplyAIPriority" class="btn btn-primary" style="flex: 1;">Duyệt & Áp Dụng Thứ Tự AI</button>
+            <button id="btnRejectAI1" class="btn btn-outline">Bỏ Qua</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../js/data-store.js"></script>
+  <script>
+    // [HÀM 1 - RENDER BẢNG KANBAN]: Phân loại và vẽ các thẻ Task vào 3 cột theo status
+    function renderTasks() {
+      const tasks = DataStore.get('RESTOCK_TASKS');
+      const pendingCol = document.getElementById('colPending');
+      const inProgressCol = document.getElementById('colInProgress');
+      const completedCol = document.getElementById('colCompleted');
+
+      pendingCol.innerHTML = '';
+      inProgressCol.innerHTML = '';
+      completedCol.innerHTML = '';
+
+      tasks.forEach(t => {
+        const cardHtml = `
+          <div class="task-card priority-${t.priority}">
+            <div style="display: flex; justify-content: space-between; align-items: start;">
+              <strong style="font-size: 0.9rem; color: var(--dark);">${t.productName}</strong>
+              <span class="location-tag">${t.shelfId}</span>
+            </div>
+            <p style="font-size: 0.8rem; color: var(--slate-500); margin: 6px 0;">Mức ưu tiên: <strong>${t.priority}</strong> | Tạo lúc: ${t.createdTime}</p>
+            <p style="font-size: 0.8rem; color: var(--slate-700);">${t.note}</p>
+            
+            <div style="margin-top: 10px; display: flex; gap: 6px;">
+              ${t.status === 'PENDING' ? `<button onclick="updateTaskStatus('${t.id}', 'IN_PROGRESS')" class="btn btn-outline" style="padding: 4px 8px; font-size: 0.75rem;">⚡ Tiếp nhận</button>` : ''}
+              ${t.status === 'IN_PROGRESS' ? `<button onclick="updateTaskStatus('${t.id}', 'COMPLETED')" class="btn btn-primary" style="padding: 4px 8px; font-size: 0.75rem;">✅ Hoàn tất</button>` : ''}
+            </div>
+          </div>
+        `;
+
+        if (t.status === 'PENDING') pendingCol.insertAdjacentHTML('beforeend', cardHtml);
+        if (t.status === 'IN_PROGRESS') inProgressCol.insertAdjacentHTML('beforeend', cardHtml);
+        if (t.status === 'COMPLETED') completedCol.insertAdjacentHTML('beforeend', cardHtml);
+      });
+    }
+
+    // [HÀM 2 - CẬP NHẬT TRẠNG THÁI TASK]: Đổi status của Task khi bấm Tiếp nhận / Hoàn tất
+    function updateTaskStatus(taskId, newStatus) {
+      DataStore.update('RESTOCK_TASKS', taskId, { status: newStatus });
+      renderTasks(); // Vẽ lại giao diện sau khi đổi status
+    }
+
+    // KHAI BÁO CÁC PHẦN TỬ MODAL AI-1
+    const btnTrigger = document.getElementById('btnTriggerAI1');
+    const ai1Modal = document.getElementById('ai1Modal');
+    const ai1Loading = document.getElementById('ai1Loading');
+    const ai1Result = document.getElementById('ai1Result');
+
+    // [HÀM 3 - KÍCH HOẠT NÚT AI-1]: Xử lý luồng Skeleton Shimmer và trả về đề xuất AI
+    btnTrigger.onclick = () => {
+      ai1Modal.classList.remove('hidden');
+      ai1Loading.classList.remove('hidden'); // Hiển thị khung Skeleton loading
+      ai1Result.classList.add('hidden');     // Ẩn kết quả ban đầu
+
+      // Giả lập 1 giây AI chạy tính toán الگوریتم
+      setTimeout(() => {
+        ai1Loading.classList.add('hidden');  // Ẩn Skeleton
+        ai1Result.classList.remove('hidden'); // Hiện kết quả đề xuất
+
+        document.getElementById('ai1RecommendationList').innerHTML = `
+          <div style="background: var(--bg-app); padding: 10px; border-radius: 6px; font-size: 0.85rem; margin-bottom: 6px; border-left: 3px solid #ef4444;">
+            🔴 <strong>1. Kệ A1-05 (Sữa TH True Milk)</strong> - Độ ưu tiên: 98% (Hết sạch hàng)
+          </div>
+          <div style="background: var(--bg-app); padding: 10px; border-radius: 6px; font-size: 0.85rem; border-left: 3px solid #ef4444;">
+            🔴 <strong>2. Kệ C1-03 (Coca Cola 330ml)</strong> - Độ ưu tiên: 89% (Bán chạy giờ vàng)
+          </div>
+        `;
+      }, 1000);
+    };
+
+    // [HÀM 4 - ĐÓNG MODAL]: Bấm nút X hoặc Bỏ qua
+    document.getElementById('btnCloseAI1').onclick = () => ai1Modal.classList.add('hidden');
+    document.getElementById('btnRejectAI1').onclick = () => ai1Modal.classList.add('hidden');
+    
+    // [HÀM 5 - ÁP DỤNG ĐỀ XUẤT AI]: Gán priority = HIGH cho các kệ A1-05 và C1-03 vào LocalStorage
+    document.getElementById('btnApplyAIPriority').onclick = () => {
+      const tasks = DataStore.get('RESTOCK_TASKS');
+      tasks.forEach(t => {
+        if (t.shelfId === 'A1-05' || t.shelfId === 'C1-03') t.priority = 'HIGH';
+      });
+      DataStore.set('RESTOCK_TASKS', tasks); // Lưu lại mảng mới vào LocalStorage
+      renderTasks(); // Render lại bảng Kanban
+      ai1Modal.classList.add('hidden');
+      alert('Đã cập nhật thứ tự ưu tiên các công việc Restock thành công!');
+    };
+
+    // Tự động render bảng Kanban khi mở trang
+    document.addEventListener('DOMContentLoaded', renderTasks);
+  </script>
+</body>
+</html>

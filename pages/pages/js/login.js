@@ -44,10 +44,12 @@ loginForm.addEventListener('submit', (e) => {
 
   localStorage.setItem('smartshelf_user', JSON.stringify(userSession));
 
+  // Đoạn mã xử lý sau khi đăng nhập thành công theo vai trò (dòng 47 - 53)
   if (role === 'shopper') {
     window.location.href = 'shopper-search.html';
   } else if (role === 'associate') {
-    window.location.href = 'associate-check.html';
+    // [HÀM ĐIỀU HƯỚNG]: Chuyển thẳng nhân viên Associate vào trang Sơ đồ Khu vực
+    window.location.href = 'associate-zone-view.html'; 
   } else if (role === 'manager') {
     window.location.href = 'manager-dashboard.html';
   }

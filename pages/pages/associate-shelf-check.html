@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SmartShelf - Kiểm tra Kệ hàng</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="associate-zone-view.html" class="brand-logo">
+        👷 SmartShelf <span class="brand-badge">Kiểm Kệ Hàng</span>
+      </a>
+      <nav style="display: flex; gap: 8px;">
+        <a href="associate-zone-view.html" class="btn btn-outline">🏠 Sơ đồ Zone</a>
+        <a href="associate-restock-task.html" class="btn btn-outline">📦 Restock Tasks</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container" style="max-width: 600px; margin-top: 30px;">
+    <div class="search-hero" style="padding: 24px;">
+      <h1 class="hero-title" style="font-size: 1.3rem;">📋 Biểu mẫu Kiểm tra Kệ hàng</h1>
+      <p class="hero-subtitle">Cập nhật chỉ số thực tế và gửi báo cáo sự cố nhãn giá / lấp đầy về quản lý</p>
+
+      <form id="shelfCheckForm">
+        <div class="form-group">
+          <label for="shelfSelect">Chọn Kệ Hàng Kiểm Tra</label>
+          <select id="shelfSelect" class="form-select" required></select>
+        </div>
+
+        <div class="form-group">
+          <label for="fillRateInput">% Lấp đầy thực tế hiện tại (0% - 100%)</label>
+          <input type="number" id="fillRateInput" class="form-input" min="0" max="100" placeholder="Nhập phần trăm..." required />
+        </div>
+
+        <div class="form-group">
+          <label for="priceTagSelect">Tình trạng Nhãn Giá Niêm Yết</label>
+          <select id="priceTagSelect" class="form-select">
+            <option value="OK">✅ Khớp chuẩn giá niêm yết</option>
+            <option value="MISSING">❌ Mất / Thiếu nhãn giá</option>
+            <option value="WRONG_PRICE">⚠️ Sai giá so với hệ thống</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="incidentNote">Mô tả Báo cáo Sự cố / Ghi chú</label>
+          <textarea id="incidentNote" class="form-input" rows="3" placeholder="Nhập chi tiết sự cố trên kệ nếu có..."></textarea>
+        </div>
+
+        <div id="checkSuccessAlert" class="hidden" style="background: var(--success-bg); color: var(--success-text); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 14px; font-size: 0.88rem; border-left: 4px solid var(--success-text);">
+          ✅ Đã lưu dữ liệu kiểm kệ và báo cáo hệ thống thành công!
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 1rem;">💾 Lưu Dữ Liệu Kiểm Kệ</button>
+      </form>
+    </div>
+  </main>
+
+  <script src="../../js/data-store.js"></script>
+  <script>
+    // [HÀM 1 - TẢI DANH SÁCH KỆ]: Nạp danh sách Kệ hàng vào ô thẻ Select và tự chọn Kệ theo URL
+    document.addEventListener('DOMContentLoaded', () => {
+      const shelves = DataStore.get('SHELVES');
+      const select = document.getElementById('shelfSelect');
+      const params = new URLSearchParams(window.location.search);
+      const targetShelfId = params.get('shelfId'); // Lấy shelfId từ đường dẫn URL
+
+      shelves.forEach(s => {
+        const option = document.createElement('option');
+        option.value = s.id;
+        option.innerText = `${s.code} - (Mức hiện tại: ${s.fillRate}%)`;
+        if (s.id === targetShelfId) option.selected = true; // Tự động chọn kệ đã bấm từ trang trước
+        select.appendChild(option);
+      });
+    });
+
+    // [HÀM 2 - XỬ LÝ LƯU KIỂM KỆ]: Đọc dữ liệu từ Form và cập nhật vào LocalStorage
+    document.getElementById('shelfCheckForm').addEventListener('submit', (e) => {
+      e.preventDefault(); // Ngăn trình duyệt load lại trang
+      
+      const shelfId = document.getElementById('shelfSelect').value;
+      const fillRate = parseInt(document.getElementById('fillRateInput').value);
+      const priceTagStatus = document.getElementById('priceTagSelect').value;
+      const note = document.getElementById('incidentNote').value.trim();
+
+      // [HÀM LƯU DỮ LIỆU 1]: Cập nhật % lấp đầy và tình trạng nhãn giá mới nhất vào bảng SHELVES
+      DataStore.update('SHELVES', shelfId, {
+        fillRate: fillRate,
+        priceTagStatus: priceTagStatus,
+        lastChecked: new Date().toLocaleString('vi-VN')
+      });
+
+      // [HÀM LƯU DỮ LIỆU 2]: Thêm một bản ghi lịch sử kiểm kệ vào bảng SHELF_CHECKS
+      DataStore.add('SHELF_CHECKS', {
+        id: 'CHK-' + Date.now(),
+        shelfId: shelfId,
+        fillRate: fillRate,
+        priceTagStatus: priceTagStatus,
+        note: note,
+        timestamp: new Date().toISOString()
+      });
+
+      // Show khung thông báo màu xanh thành công trong 3 giây
+      const alertBox = document.getElementById('checkSuccessAlert');
+      alertBox.classList.remove('hidden');
+      setTimeout(() => alertBox.classList.add('hidden'), 3000);
+    });
+  </script>
+</body>
+</html>
