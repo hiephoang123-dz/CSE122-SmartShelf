@@ -49,7 +49,7 @@ loginForm.addEventListener('submit', (e) => {
     window.location.href = 'shopper-search.html';
   } else if (role === 'associate') {
     // [HÀM ĐIỀU HƯỚNG]: Chuyển thẳng nhân viên Associate vào trang Sơ đồ Khu vực
-    window.location.href = 'associate-zone-view.html'; 
+    window.location.href = 'pages/pages/associate-zone-view.html';
   } else if (role === 'manager') {
     window.location.href = 'manager-dashboard.html';
   }
