@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmarShelf - Sơ đồ Khu vực Kệ hàng</title>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="container navbar-inner">
+            <a href="associate-zone-view.html" class="brand-logo">
+                SmartShelf <span class="brand-badge">Nhân Viên Cửa Hàng</span>
+            </a>
+            <nav style="display: flex;gap: 8px; flex-wrap: wrap;">
+                <a href="associate-zone-view.html" class="btn btn-primary"> Sơ đồ Zone</a>
+                <a href="associate-shelf-check.html" class="btn btn-outline">Kiểm kệ</a>
+                <a href="associate-restock-task.html" class="btn btn-outline"> Tasks Bơm hàng</a>
+                <a href="notifications.html" class="btn btn-ouline"> Thông báo</a>
+                <a href="profile.html" class="btn btn-ouline"> Cá nhân</a>
+            </nav>
+        </div>
+    </header>
+    <main class="container" style="margin-top: 24px;">
+        <section class="search-hero">
+            <h1 class="hero-title">Tổng quan Khu vực (Zone View)</h1>
+            <p class="hero-subitle">Theo dõi tỷ lệ lấp đầy và mã màu trạng thái vận hành của toàn bộ hệ thống kệ hàng</p>
+            <div style="display: flex; gap: 16px;align-items: center; background: var(--bg-app);padding: 12px 16px ; border-radius: var(--radius-sm); border: 1px solid var(-- slate-200); flex-wrap: ;">
+                <span style="font-weight: 700; font-size: 0.88rem;color: var(--slate-700);">Trạng thái mã màu</span>
+                <span style="color: #10b981; font-weight: 700; font-size: 0.85rem";> Bình thường (&gt;70%)</span>
+                <span style="color: #f59e0b; font-weight: 700; font-size: 0.85rem;">Cần chú ý (30%-70%)</span>
+                <span style="color: #ef4444; font-weight: 700; font-size: 0.85rem;">Hàng hết / Gấp (&lt;30%)</span>
+            </div>
+        </section>
+        <div id="zoneContainer"></div>
+    </main>
+    <script src="../../js/data-store.js"></script>
+    <script>
+        function renderZones(){
+            const zones = DataStore.get('ZONES');
+            const shelves = DataStore.get('SHELVES');
+            const container = document.getElementById(' zoneContainer');
+            container.innerHTML = '';
+            zones.forEach(zone => {
+                const zoneShelves = shelves.filter(s => s.zoneId === zone.id);
+
+                let html = `
+                <div class="zone-card">
+                    <div style ="display: flex; justify-content: space-between;align-items: center; border-bottom: 1px solid var(--slate -200); padding-bottom:12px;">
+                        <div>
+                            <h2 style="font-size: 1.15rem; font-weight: 800; color: var(--dark);">&{zone.name}</h2>
+                            <span style="font-size: 0.82rem; color: var(--slate-500);">Quản lý khu: ${zone.manager}</span>
+                            </div>
+                            <div class = "shelf-grid-mini">
+                `;
+                zoneShelves.forEach(shelf => {
+                    let statusClass = 'shelf-status-normal';
+                    let statusLabel = 'Đầy đủ';
+                    if(shelf.fillRate <= 30) {statusClass = 'shelf-status-critical'; statusLabel = 'Hết hàng / Gấp';}
+                    else if(shelf,fillRate <= 70){statusClass = 'shelf-status-waring'; statusLabel = 'Cần chú ý';}
+
+                    html += `
+                    <div class ="shelf-item ${statusClass}">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="font-size: 0.95rem; color: var(--dark);">${shelf.code}</strong>
+                            <span style ="font-size: 0.75rem; font-weight: 700;" class =${shelf.fillRate < 30 ? 'stock-out' : ' stock-in'}${shelf.fillRate}%</span>
+                                </div>
+                                <p style = "font-size: 0.8rem; color: var(--slate-500); margin-top: 6px;">Tình trạng: <strong>${statusLabel}</strong></p>
+                                <p style = "font-size: 0.75rem; color:var(--slate-500);">Nhãn giá: ${shelf.priceTagStatus === 'OK' ? 'Chuẩn' : 'Lỗi/Thiếu'}</p>
+                                <a href ="associate-shelf-check.html?shelfId=${shelf.id}" class="btn btn-ouline" style="width: 100%; margin-top: 10px; padding:" 6px 8px; font-size: 0.78rem">
+                                    Kiểm tra kệ này
+                                    </a>
+                                    </div>
+                    `;
+                });
+                html += `</div></div> `;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+        }
+        document.addEventListener('DOMContentLoaded', renderZones);
+    </script>
+</body>
+</html>
