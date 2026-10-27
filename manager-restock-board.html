@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>SmartShelf - Restock Kanban</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="manager-store-dashboard.html" class="brand-logo">🛒 SmartShelf <span class="brand-badge">Kanban</span></a>
+      <nav class="nav-menu">
+        <a href="manager-store-dashboard.html" class="nav-link">📊 Dashboard</a>
+        <a href="manager-restock-board.html" class="nav-link active">📋 Restock Kanban</a>
+        <a href="admin-product-management.html" class="nav-link">📦 Sản phẩm</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div style="margin-top:24px;">
+      <h1 style="font-size: 1.4rem; font-weight: 800;">Bảng Điều phối Restock</h1>
+    </div>
+
+    <div class="kanban-grid">
+      <div class="kanban-col">
+        <div class="col-header"><span>🔴 Cần làm</span></div>
+        <div class="task-card">
+          <div class="task-title">Bổ sung Kệ A1-05</div>
+          <button class="btn btn-primary btn-assign" style="margin-top:8px;">Giao việc</button>
+        </div>
+      </div>
+      <div class="kanban-col">
+        <div class="col-header"><span>🟡 Đang làm</span></div>
+      </div>
+      <div class="kanban-col">
+        <div class="col-header"><span>🟢 Hoàn thành</span></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="manager-restock-board.js"></script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>SmartShelf - Dashboard Quản lý</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="manager-store-dashboard.html" class="brand-logo">🛒 SmartShelf <span class="brand-badge">Manager</span></a>
+      <nav class="nav-menu">
+        <a href="manager-store-dashboard.html" class="nav-link active">📊 Dashboard</a>
+        <a href="manager-restock-board.html" class="nav-link">📋 Restock Kanban</a>
+        <a href="admin-product-management.html" class="nav-link">📦 Sản phẩm</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div style="margin-top: 24px; display: flex; justify-content: space-between; align-items: center;">
+      <div>
+        <h1 style="font-size: 1.5rem; font-weight: 800;">Tổng quan Vận hành Cửa hàng</h1>
+        <p style="color: var(--slate-500); font-size: 0.88rem;">Cập nhật tình trạng tồn kho và cảnh báo hệ thống</p>
+      </div>
+      <button id="btnRunAI3" class="btn btn-ai">✨ AI-3: Quét bất thường Kệ hàng</button>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-title">Tỷ lệ lấp đầy kệ</div>
+        <div class="kpi-value" style="color: var(--primary);">88.5%</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-title">Kệ hết/thiếu sp</div>
+        <div class="kpi-value" style="color: var(--danger-text);">8 Kệ</div>
+      </div>
+    </div>
+  </main>
+
+  <!-- MODAL AI-3 -->
+  <div id="ai3Modal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-ai-header">
+        <h3>✨ AI-3: Shelf Anomaly Insight</h3>
+        <button id="btnCloseAI3" style="background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;">✕</button>
+      </div>
+      <div style="padding: 20px;">
+        <p style="font-size: 0.88rem; color: var(--slate-500); margin-bottom: 16px;">Phát hiện sai lệch vị trí & thất thoát tồn kho thực tế.</p>
+        <button id="btnCreateAuditTask" class="btn btn-primary" style="width: 100%;">Tạo Nhiệm vụ Kiểm tra Đột xuất</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="manager-store-dashboard.js"></script>
+</body>
+</html>

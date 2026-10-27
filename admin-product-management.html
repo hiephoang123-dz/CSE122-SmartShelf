@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>SmartShelf - Admin Sản phẩm</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="navbar">
+    <div class="container navbar-inner">
+      <a href="manager-store-dashboard.html" class="brand-logo">🛒 SmartShelf <span class="brand-badge">Admin</span></a>
+      <nav class="nav-menu">
+        <a href="manager-store-dashboard.html" class="nav-link">📊 Dashboard</a>
+        <a href="manager-restock-board.html" class="nav-link">📋 Restock Kanban</a>
+        <a href="admin-product-management.html" class="nav-link active">📦 Sản phẩm</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <div style="margin-top:24px; display:flex; justify-content:space-between; align-items:center;">
+      <h1 style="font-size: 1.4rem; font-weight: 800;">Quản lý Sản phẩm</h1>
+      <button id="btnAddProduct" class="btn btn-primary">+ Thêm mới</button>
+    </div>
+
+    <div class="card-panel" style="margin-top: 20px;">
+      <div style="margin-bottom:16px;">
+        <input type="text" id="pSearch" class="form-input" placeholder="🔍 Tìm kiếm nhanh..." style="width: 280px;">
+      </div>
+      <table>
+        <thead>
+          <tr><th>Mã SP</th><th>Tên sản phẩm</th><th>Danh mục</th><th>Thao tác</th></tr>
+        </thead>
+        <tbody id="productTableBody">
+          <tr><td><strong>P01</strong></td><td>Sữa tươi Vinamilk 1L</td><td>Dairy</td><td><button class="btn btn-danger" onclick="this.closest('tr').remove()">Xóa</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="admin-product-management.js"></script>
+</body>
+</html>
