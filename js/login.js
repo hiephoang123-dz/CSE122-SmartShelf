@@ -51,7 +51,7 @@ loginForm.addEventListener('submit', (e) => {
     // [HÀM ĐIỀU HƯỚNG]: Chuyển thẳng nhân viên Associate vào trang Sơ đồ Khu vực
     window.location.href = 'pages/pages/associate-zone-view.html';
   } else if (role === 'manager') {
-    window.location.href = 'manager-dashboard.html';
+    window.location.href = 'manager-store-dashboard.html';
   }
 });
 
